@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Your Position — {{ app_name }}</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: linear-gradient(135deg, #0d1117, #1b2a4a, #0d7377);
+    min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px;
+  }
+  .card {
+    background: rgba(255,255,255,0.05); backdrop-filter: blur(20px);
+    border: 1px solid rgba(255,255,255,0.1); border-radius: 24px;
+    padding: 48px; max-width: 480px; width: 100%; text-align: center;
+  }
+  h1 { color: #fff; font-size: 2rem; margin-bottom: 8px; }
+  .position-box {
+    background: linear-gradient(135deg, rgba(13,115,119,0.3), rgba(91,200,204,0.1));
+    border: 2px solid rgba(13,115,119,0.5); border-radius: 16px;
+    padding: 28px; margin: 28px 0;
+  }
+  .position-number { font-size: 4rem; font-weight: 800; color: #5bc8cc; }
+  .position-label { color: rgba(255,255,255,0.6); font-size: 0.9rem; margin-top: 4px; }
+  .referral-box {
+    background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 14px; padding: 20px; margin: 20px 0;
+  }
+  .referral-title { color: #fff; font-weight: 600; margin-bottom: 8px; font-size: 0.95rem; }
+  .referral-desc { color: rgba(255,255,255,0.5); font-size: 0.8rem; margin-bottom: 14px; }
+  .referral-link {
+    background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 8px; padding: 10px 14px; color: #5bc8cc;
+    font-family: monospace; font-size: 0.85rem; word-break: break-all;
+    cursor: pointer; display: block; text-align: left;
+  }
+  .copy-btn {
+    width: 100%; margin-top: 10px; padding: 12px; background: rgba(13,115,119,0.4);
+    border: 1px solid rgba(13,115,119,0.6); color: #5bc8cc; border-radius: 8px;
+    cursor: pointer; font-size: 0.9rem; font-weight: 600; transition: all 0.2s;
+  }
+  .copy-btn:hover { background: rgba(13,115,119,0.6); }
+  .stats { display: flex; gap: 12px; margin-top: 20px; }
+  .stat { flex: 1; background: rgba(255,255,255,0.04); border-radius: 10px; padding: 14px; }
+  .stat-val { color: #fff; font-size: 1.4rem; font-weight: 700; }
+  .stat-lbl { color: rgba(255,255,255,0.45); font-size: 0.75rem; margin-top: 2px; }
+  p { color: rgba(255,255,255,0.6); margin-bottom: 16px; }
+</style>
+</head>
+<body>
+<div class="card">
+  <h1>🎉 You're on the list!</h1>
+  <p>{{ subscriber.name or subscriber.email }} — your spot is confirmed.</p>
+
+  <div class="position-box">
+    <div class="position-number">#{{ subscriber.effective_position }}</div>
+    <div class="position-label">Your current position</div>
+  </div>
+
+  <div class="referral-box">
+    <div class="referral-title">🚀 Move up the list</div>
+    <div class="referral-desc">Each friend you refer moves you up 5 spots. You've referred <strong style="color:#5bc8cc">{{ subscriber.referral_count }}</strong> people.</div>
+    <div class="referral-link" id="refLink">{{ request.host_url }}?ref={{ subscriber.referral_code }}</div>
+    <button class="copy-btn" onclick="copyLink()">📋 Copy Referral Link</button>
+  </div>
+
+  <div class="stats">
+    <div class="stat">
+      <div class="stat-val">{{ total }}</div>
+      <div class="stat-lbl">Total on list</div>
+    </div>
+    <div class="stat">
+      <div class="stat-val">{{ subscriber.referral_count }}</div>
+      <div class="stat-lbl">Your referrals</div>
+    </div>
+    <div class="stat">
+      <div class="stat-val">#{{ subscriber.effective_position }}</div>
+      <div class="stat-lbl">Your position</div>
+    </div>
+  </div>
+</div>
+
+<script>
+function copyLink() {
+  const link = document.getElementById('refLink').textContent;
+  navigator.clipboard.writeText(link).then(() => {
+    document.querySelector('.copy-btn').textContent = '✅ Copied!';
+    setTimeout(() => document.querySelector('.copy-btn').textContent = '📋 Copy Referral Link', 2000);
+  });
+}
+</script>
+</body>
+</html>

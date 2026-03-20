@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"><title>Thank You!</title>
+<style>
+  body { font-family: sans-serif; background: linear-gradient(135deg,#0d1117,#1b2a4a,#0d7377);
+         min-height:100vh; display:flex; align-items:center; justify-content:center; }
+  .card { background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1);
+          border-radius:24px; padding:48px; max-width:420px; text-align:center; }
+  h1 { color:#fff; font-size:2rem; margin-bottom:12px; }
+  p { color:rgba(255,255,255,0.6); margin-bottom:20px; }
+  .info { background:rgba(13,115,119,0.2); border:1px solid rgba(13,115,119,0.4);
+          border-radius:12px; padding:16px; color:#5bc8cc; font-size:0.9rem; }
+</style>
+</head>
+<body>
+<div class="card">
+  <div style="font-size:3rem;margin-bottom:16px">🎉</div>
+  <h1>You're on the list!</h1>
+  <p>Thanks for joining {{ app_name }}! Check your email to confirm your spot.</p>
+  <div class="info">📧 Confirmation email sent to<br><strong>{{ subscriber.email }}</strong></div>
+  <p style="margin-top:20px;font-size:0.85rem">
+    <a href="/status/{{ subscriber.confirmation_token }}" style="color:#5bc8cc">
+      View your position →
+    </a>
+  </p>
+</div>
+</body>
+</html>

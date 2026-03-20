@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin Dashboard</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, sans-serif; background: #0d1117; color: #e6edf3; }
+  .sidebar { width: 220px; background: #161b22; height: 100vh; position: fixed;
+             padding: 24px 16px; border-right: 1px solid #30363d; }
+  .logo { font-size: 1.1rem; font-weight: 700; color: #5bc8cc; margin-bottom: 32px; }
+  .nav a { display: block; padding: 10px 12px; color: #8b949e; text-decoration: none;
+           border-radius: 8px; margin-bottom: 4px; font-size: 0.9rem; transition: all 0.2s; }
+  .nav a:hover, .nav a.active { background: rgba(91,200,204,0.1); color: #5bc8cc; }
+  .main { margin-left: 220px; padding: 32px; }
+  .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 28px; }
+  .stat-card { background: #161b22; border: 1px solid #30363d; border-radius: 12px; padding: 20px; }
+  .stat-val { font-size: 2rem; font-weight: 700; color: #5bc8cc; }
+  .stat-lbl { color: #8b949e; font-size: 0.85rem; margin-top: 4px; }
+  .toolbar { display: flex; gap: 12px; margin-bottom: 20px; align-items: center; }
+  .search { flex: 1; padding: 10px 14px; background: #161b22; border: 1px solid #30363d;
+            border-radius: 8px; color: #e6edf3; font-size: 0.9rem; }
+  .btn { padding: 10px 16px; border-radius: 8px; border: none; cursor: pointer;
+         font-size: 0.85rem; font-weight: 600; transition: opacity 0.2s; }
+  .btn-teal { background: #0d7377; color: #fff; }
+  .btn-gray { background: #21262d; color: #8b949e; border: 1px solid #30363d; }
+  .btn:hover { opacity: 0.85; }
+  table { width: 100%; border-collapse: collapse; background: #161b22;
+          border: 1px solid #30363d; border-radius: 12px; overflow: hidden; }
+  th { padding: 12px 16px; text-align: left; font-size: 0.8rem; color: #8b949e;
+       text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 1px solid #30363d; }
+  td { padding: 12px 16px; font-size: 0.9rem; border-bottom: 1px solid #21262d; }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: rgba(255,255,255,0.02); }
+  .badge { padding: 3px 10px; border-radius: 100px; font-size: 0.75rem; font-weight: 600; }
+  .badge-waiting { background: rgba(255,200,0,0.15); color: #ffc800; }
+  .badge-approved { background: rgba(68,187,68,0.15); color: #44bb44; }
+  .badge-confirmed { background: rgba(91,200,204,0.15); color: #5bc8cc; }
+</style>
+</head>
+<body>
+<div class="sidebar">
+  <div class="logo">🚀 OpenWaitlist</div>
+  <div class="nav">
+    <a href="/admin/" class="active">📊 Dashboard</a>
+    <a href="/admin/export">📥 Export CSV</a>
+    <a href="/admin/logout">🚪 Logout</a>
+  </div>
+</div>
+
+<div class="main">
+  <h2 style="margin-bottom:24px;font-size:1.4rem">📊 Waitlist Dashboard</h2>
+
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-val">{{ stats.total }}</div>
+      <div class="stat-lbl">Total Signups</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-val">{{ stats.confirmed }}</div>
+      <div class="stat-lbl">Confirmed</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-val">{{ stats.approved }}</div>
+      <div class="stat-lbl">Approved</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-val">{{ stats.waiting }}</div>
+      <div class="stat-lbl">Waiting</div>
+    </div>
+  </div>
+
+  <div class="toolbar">
+    <form method="GET" style="display:flex;gap:12px;flex:1">
+      <input class="search" name="search" placeholder="Search by email..." value="{{ search }}">
+      <select name="status" class="search" style="flex:0;width:140px">
+        <option value="all" {% if status_filter=='all' %}selected{% endif %}>All Status</option>
+        <option value="waiting" {% if status_filter=='waiting' %}selected{% endif %}>Waiting</option>
+        <option value="approved" {% if status_filter=='approved' %}selected{% endif %}>Approved</option>
+      </select>
+      <button type="submit" class="btn btn-teal">Search</button>
+    </form>
+    <a href="/admin/export" class="btn btn-gray">📥 Export CSV</a>
+  </div>
+
+  <table>
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>Email</th>
+        <th>Name</th>
+        <th>Position</th>
+        <th>Referrals</th>
+        <th>Status</th>
+        <th>Confirmed</th>
+        <th>Joined</th>
+        <th>Action</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for sub in subscribers.items %}
+      <tr>
+        <td style="color:#8b949e">{{ sub.id }}</td>
+        <td>{{ sub.email }}</td>
+        <td style="color:#8b949e">{{ sub.name or '—' }}</td>
+        <td><strong>#{{ sub.effective_position }}</strong></td>
+        <td style="color:#5bc8cc">{{ sub.referral_count }}</td>
+        <td>
+          <span class="badge badge-{{ sub.status }}">{{ sub.status }}</span>
+        </td>
+        <td>
+          {% if sub.confirmed %}
+            <span class="badge badge-confirmed">✅ Yes</span>
+          {% else %}
+            <span style="color:#8b949e;font-size:0.8rem">Pending</span>
+          {% endif %}
+        </td>
+        <td style="color:#8b949e;font-size:0.8rem">{{ sub.created_at.strftime('%Y-%m-%d') }}</td>
+        <td>
+          {% if sub.status == 'waiting' and sub.confirmed %}
+          <form method="POST" action="/admin/approve/{{ sub.id }}" style="display:inline">
+            <button type="submit" class="btn btn-teal" style="padding:6px 12px;font-size:0.8rem">
+              Approve
+            </button>
+          </form>
+          {% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  {% if subscribers.pages > 1 %}
+  <div style="margin-top:20px;display:flex;gap:8px;justify-content:center">
+    {% for page in subscribers.iter_pages() %}
+      {% if page %}
+        <a href="?page={{ page }}" style="padding:8px 12px;background:#161b22;border:1px solid #30363d;
+           border-radius:6px;color:{% if page==subscribers.page %}#5bc8cc{% else %}#8b949e{% endif %};
+           text-decoration:none;font-size:0.85rem">{{ page }}</a>
+      {% endif %}
+    {% endfor %}
+  </div>
+  {% endif %}
+</div>
+</body>
+</html>
