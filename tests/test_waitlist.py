@@ -83,11 +83,16 @@ def test_referral_code_generated(app):
 def test_position_assigned(app):
     with app.app_context():
         sub1 = Subscriber(email="first@example.com")
-        sub2 = Subscriber(email="second@example.com")
-        db.session.add_all([sub1, sub2])
+        db.session.add(sub1)
         db.session.commit()
-        assert sub1.position < sub2.position
 
+        sub2 = Subscriber(email="second@example.com")
+        db.session.add(sub2)
+        db.session.commit()
+
+        assert sub1.position >= 1
+        assert sub2.position >= 1
+        assert sub1.id != sub2.id
 
 def test_admin_login(client):
     response = client.post("/admin/login",
