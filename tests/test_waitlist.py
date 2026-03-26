@@ -1,7 +1,3 @@
-"""
-Tests for OpenWaitlist
-"""
-
 import pytest
 from app import create_app, db
 from src.models.subscriber import Subscriber
