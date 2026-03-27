@@ -1,7 +1,3 @@
-"""
-Database Models
-"""
-
 import uuid
 import hashlib
 from datetime import datetime
